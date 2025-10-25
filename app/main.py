@@ -87,12 +87,11 @@ def delete_post(id: int):
 
 @app.put("/posts/{id}", status_code=status.HTTP_200_OK)
 def update_post(id: int, updated_post: Post):
-    for idx, post in enumerate(my_posts):
-        if post["id"] == id:
-            updated_post_dict = updated_post.model_dump()
-            updated_post_dict['id'] = id
-            my_posts[idx] = updated_post_dict
-            return {"data": updated_post_dict}
-    if updated_post_dict is None:
+    cursor.execute("""UPDATE POSTS SET title = %s, content = %s, published = %s RETURNING *""", 
+                   (updated_post.title, updated_post.content, updated_post.published))
+    post = cursor.fetchone()
+    conn.commit()
+    if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Post with id {id} is not found.")
+    return {"data": post}
