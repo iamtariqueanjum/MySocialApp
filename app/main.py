@@ -66,13 +66,10 @@ def create_post(post: Post, response: Response):
 
 @app.get("/posts/{id}")
 def get_post(id: int, response: Response):
-    for post in my_posts:
-        if post["id"] == id:
-            return {"data": post}
-    # response.status_code = status.HTTP_404_NOT_FOUND
-    # return {"error": f"Post with id {id} not found."}
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                        detail=f"Post with id {id} is not found.")
+    cursor.execute("""SELECT * FROM POSTS WHERE ID=%s""", (str(id)))
+    post = cursor.fetchone()
+    return {"data": post}
+
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
