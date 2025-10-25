@@ -2,6 +2,10 @@ from fastapi import FastAPI, Response, status, HTTPException
 
 from pydantic import BaseModel
 from typing import Optional
+import time
+
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 
 class Post(BaseModel):
@@ -10,6 +14,21 @@ class Post(BaseModel):
     content: str
     published: bool = True
     rating: Optional[int] = None
+
+while True:
+    try:
+        conn = psycopg2.connect(host="localhost", database="MySocialApp",
+                                user="postgres", password="admin123", 
+                                cursor_factory=RealDictCursor) # for column names
+        cursor = conn.cursor()
+        print("Database connected successfully...")
+        break
+    except Exception as err:
+        print("Database connection failed...")
+        print(f"Error: {str(err)}")
+        time.sleep(2)
+
+
 
 
 app = FastAPI()
