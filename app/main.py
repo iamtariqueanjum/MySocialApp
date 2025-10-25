@@ -68,6 +68,9 @@ def create_post(post: Post, response: Response):
 def get_post(id: int, response: Response):
     cursor.execute("""SELECT * FROM POSTS WHERE ID=%s""", (str(id)))
     post = cursor.fetchone()
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Post with id {id} is not found.")
     return {"data": post}
 
 
