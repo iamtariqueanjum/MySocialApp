@@ -44,7 +44,10 @@ def home_page():
 
 @app.get("/posts")
 def get_posts():
-    return {"data": my_posts}
+    query = """SELECT * FROM POSTS"""
+    cursor.execute(query)
+    posts = cursor.fetchall()
+    return {"data": posts}
 
 # from fastapi.params import Body
 # @app.post("/posts/create")
