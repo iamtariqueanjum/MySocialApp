@@ -9,11 +9,10 @@ from psycopg2.extras import RealDictCursor
 
 
 class Post(BaseModel):
-    id: int 
     title: str 
     content: str
     published: bool = True
-    rating: Optional[int] = None
+
 
 while True:
     try:
@@ -44,8 +43,7 @@ def home_page():
 
 @app.get("/posts")
 def get_posts():
-    query = """SELECT * FROM POSTS"""
-    cursor.execute(query)
+    cursor.execute(""" SELECT * FROM POSTS """)
     posts = cursor.fetchall()
     return {"data": posts}
 
@@ -59,18 +57,12 @@ def get_posts():
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_post(post: Post, response: Response):
-    from random import randrange
-    id = randrange(0, 1000000)
-    post_dict = post.dict()
-    post_dict['id'] = id
-    for p in my_posts:
-        # if p["id"] == post.id:
-        #     return {"error": f"Post with this ID {post.id} already exists."}
-        if p["title"] ==  post_dict["title"]:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, 
-                                detail=f"Post with this title '{post.title}' already exists.")
-    my_posts.append(post_dict)
-    return {"data": post_dict}
+    cursor.execute("""INSERT INTO POSTS (title, content, published) VALUES (%s, %s, %s) RETURNING *""",
+                   (post.title, post.content, post.published))
+    new_post = cursor.fetchone()
+    conn.commit()
+    return {"data": new_post}
+
 
 @app.get("/posts/{id}")
 def get_post(id: int, response: Response):
